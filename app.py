@@ -26,10 +26,8 @@ IDX_TO_SENT       = {0: "negatif", 1: "positif"}
 IDX_TO_TOPIC      = {0: "program", 1: "anggaran", 2: "gizi", 3: "distribusi"}
 MAX_LEN           = 128
 
-# ── GANTI dengan username dan nama repo Hugging Face kamu ──
 HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen/indobert_sentimen"
 HF_TOPIC_MODEL = "fandihw/mbg-indobert-topik/indobert_topik"
-# ───────────────────────────────────────────────────────────
 
 PALETTE = {
     "negatif"   : "#E74C3C",
