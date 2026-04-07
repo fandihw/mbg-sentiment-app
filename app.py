@@ -355,7 +355,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigasi",
-        [" Dashboard", " Prediksi Tweet", " Evaluasi Model", "Info Tentang"],
+        [" Dashboard", " Prediksi Tweet", " Evaluasi Model"],
         label_visibility="collapsed",
     )
     st.markdown("---")
