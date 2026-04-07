@@ -27,8 +27,8 @@ IDX_TO_TOPIC      = {0: "program", 1: "anggaran", 2: "gizi", 3: "distribusi"}
 MAX_LEN           = 128
 
 # ── GANTI dengan username dan nama repo Hugging Face kamu ──
-HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen"
-HF_TOPIC_MODEL = "fandihw/mbg-indobert-topik"
+HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen/indobert_sentimen"
+HF_TOPIC_MODEL = "fandihw/mbg-indobert-topik/indobert_topik"
 # ───────────────────────────────────────────────────────────
 
 PALETTE = {
@@ -95,19 +95,33 @@ def load_models():
     """Load fine-tuned IndoBERT models dari Hugging Face Hub."""
     import torch
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
+    from huggingface_hub import snapshot_download
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Tokenizer dari base model (lebih stabil)
+    # Download folder model dari HF
+    sent_dir = snapshot_download(
+        repo_id="fandihw/mbg-indobert-sentimen",
+        allow_patterns="indobert_sentimen/*",
+    )
+    topik_dir = snapshot_download(
+        repo_id="fandihw/mbg-indobert-topik",
+        allow_patterns="indobert_topik/*",
+    )
+
+    import os
+    sent_path  = os.path.join(sent_dir,  "indobert_sentimen")
+    topik_path = os.path.join(topik_dir, "indobert_topik")
+
+    # Tokenizer dari base model
     BASE_MODEL = "indobenchmark/indobert-base-p1"
     tok_sent = AutoTokenizer.from_pretrained(BASE_MODEL)
     tok_top  = AutoTokenizer.from_pretrained(BASE_MODEL)
 
-    # Model dari repo fine-tuned kamu
-    model_sent = AutoModelForSequenceClassification.from_pretrained(HF_SENT_MODEL).to(device)
+    model_sent = AutoModelForSequenceClassification.from_pretrained(sent_path).to(device)
     model_sent.eval()
 
-    model_top = AutoModelForSequenceClassification.from_pretrained(HF_TOPIC_MODEL).to(device)
+    model_top = AutoModelForSequenceClassification.from_pretrained(topik_path).to(device)
     model_top.eval()
 
     return tok_sent, model_sent, tok_top, model_top, device
