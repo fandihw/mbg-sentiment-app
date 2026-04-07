@@ -389,9 +389,6 @@ with st.sidebar:
     else:
         st.markdown("[!] Model belum dimuat - fitur prediksi nonaktif")
 
-    st.markdown("---")
-    st.caption("Tugas Akhir - Universitas Telkom - 2025")
-
 # PAGE HEADER
 st.markdown("""
 <div class="mbg-header">
