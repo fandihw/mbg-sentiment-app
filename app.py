@@ -26,8 +26,10 @@ IDX_TO_SENT       = {0: "negatif", 1: "positif"}
 IDX_TO_TOPIC      = {0: "program", 1: "anggaran", 2: "gizi", 3: "distribusi"}
 MAX_LEN           = 128
 
-HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen"
-HF_TOPIC_MODEL = "fandihw/mbg-indobert-sentimen"
+# ── GANTI dengan username dan nama repo Hugging Face kamu ──
+HF_SENT_MODEL  = "username-kamu/mbg-indobert-sentimen"
+HF_TOPIC_MODEL = "username-kamu/mbg-indobert-topik"
+# ───────────────────────────────────────────────────────────
 
 PALETTE = {
     "negatif"   : "#E74C3C",
@@ -96,11 +98,15 @@ def load_models():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tok_sent   = AutoTokenizer.from_pretrained(HF_SENT_MODEL, use_fast=False)
+    # Tokenizer dari base model (lebih stabil)
+    BASE_MODEL = "indobenchmark/indobert-base-p1"
+    tok_sent = AutoTokenizer.from_pretrained(BASE_MODEL)
+    tok_top  = AutoTokenizer.from_pretrained(BASE_MODEL)
+
+    # Model dari repo fine-tuned kamu
     model_sent = AutoModelForSequenceClassification.from_pretrained(HF_SENT_MODEL).to(device)
     model_sent.eval()
 
-    tok_top   = AutoTokenizer.from_pretrained(HF_TOPIC_MODEL, use_fast=False)
     model_top = AutoModelForSequenceClassification.from_pretrained(HF_TOPIC_MODEL).to(device)
     model_top.eval()
 
