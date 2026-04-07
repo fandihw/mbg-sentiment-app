@@ -312,13 +312,7 @@ def plot_confusion_matrix(cm, labels, title):
 # CUSTOM CSS
 st.markdown("""
 <style>
-.mbg-header {
-    background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 100%);
-    padding: 1.6rem 2rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    color: white;
-}
+
 .mbg-header h1 { margin: 0; font-size: 1.65rem; font-weight: 700; }
 .mbg-header p  { margin: 0.3rem 0 0; font-size: 0.9rem; opacity: 0.88; }
 
