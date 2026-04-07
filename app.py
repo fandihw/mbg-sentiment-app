@@ -783,46 +783,46 @@ elif page == " Evaluasi Model":
     </div>""", unsafe_allow_html=True)
 
 # TENTANG
-elif page == "Info Tentang":
-    st.markdown("### Info Tentang Aplikasi")
-    st.markdown("""
-    Aplikasi ini merupakan implementasi hasil **Tugas Akhir** yang mengembangkan model
-    klasifikasi sentimen dan topik untuk menganalisis opini publik terhadap kebijakan
-    **Makanan Bergizi Gratis (MBG)** Pemerintah Indonesia.
-    """)
+# elif page == "Info Tentang":
+#     st.markdown("### Info Tentang Aplikasi")
+#     st.markdown("""
+#     Aplikasi ini merupakan implementasi hasil **Tugas Akhir** yang mengembangkan model
+#     klasifikasi sentimen dan topik untuk menganalisis opini publik terhadap kebijakan
+#     **Makanan Bergizi Gratis (MBG)** Pemerintah Indonesia.
+#     """)
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown("""
-        **Metodologi:**
-        - Pengumpulan data via Twitter scraping (`twikit`)
-        - Filtering buzzer & akun tidak autentik
-        - Preprocessing: stopwords removal tanpa stemming (Skenario A)
-        - Topic modeling: **LDA** (4 topik: Program, Anggaran, Gizi, Distribusi)
-        - Sentiment & topic classification: **IndoBERT** fine-tuned
-        - Evaluasi: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
-        """)
-    with col_b:
-        st.markdown("""
-        **Konfigurasi Model:**
-        - Base model: `indobenchmark/indobert-base-p1`
-        - Max token length: 128
-        - Batch size: 16
-        - Epochs: 5 (sentimen & topik)
-        - Learning rate: 2e-5
-        - Class weighting untuk mengatasi imbalance
-        - Optimizer: AdamW + warmup scheduler
-        """)
+#     col_a, col_b = st.columns(2)
+#     with col_a:
+#         st.markdown("""
+#         **Metodologi:**
+#         - Pengumpulan data via Twitter scraping (`twikit`)
+#         - Filtering buzzer & akun tidak autentik
+#         - Preprocessing: stopwords removal tanpa stemming (Skenario A)
+#         - Topic modeling: **LDA** (4 topik: Program, Anggaran, Gizi, Distribusi)
+#         - Sentiment & topic classification: **IndoBERT** fine-tuned
+#         - Evaluasi: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
+#         """)
+#     with col_b:
+#         st.markdown("""
+#         **Konfigurasi Model:**
+#         - Base model: `indobenchmark/indobert-base-p1`
+#         - Max token length: 128
+#         - Batch size: 16
+#         - Epochs: 5 (sentimen & topik)
+#         - Learning rate: 2e-5
+#         - Class weighting untuk mengatasi imbalance
+#         - Optimizer: AdamW + warmup scheduler
+#         """)
 
-    st.markdown("---")
-    st.markdown("""
-    **Label Topik:**
+#     st.markdown("---")
+#     st.markdown("""
+#     **Label Topik:**
 
-    | Topik | Kata Kunci Representatif |
-    |-------|--------------------------|
-    | Program | pendidikan, kualitas, guru, negara, keracunan, kebijakan, dana |
-    | Anggaran | rakyat, anggaran, korupsi, negara, efisiensi, APBN, pejabat, pajak |
-    | Gizi | anak, gizi, keracunan, kualitas, pelaksanaan, siswa, sekolah, sehat |
-    | Distribusi | catering, sekolah, dapur, kualitas, korupsi, keracunan, porsi, vendor |
-    """)
-    st.caption("Universitas Telkom - Tugas Akhir 2025")
+#     | Topik | Kata Kunci Representatif |
+#     |-------|--------------------------|
+#     | Program | pendidikan, kualitas, guru, negara, keracunan, kebijakan, dana |
+#     | Anggaran | rakyat, anggaran, korupsi, negara, efisiensi, APBN, pejabat, pajak |
+#     | Gizi | anak, gizi, keracunan, kualitas, pelaksanaan, siswa, sekolah, sehat |
+#     | Distribusi | catering, sekolah, dapur, kualitas, korupsi, keracunan, porsi, vendor |
+#     """)
+#     st.caption("Universitas Telkom - Tugas Akhir 2025")
