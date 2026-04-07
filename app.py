@@ -27,8 +27,8 @@ IDX_TO_TOPIC      = {0: "program", 1: "anggaran", 2: "gizi", 3: "distribusi"}
 MAX_LEN           = 128
 
 # ── GANTI dengan username dan nama repo Hugging Face kamu ──
-HF_SENT_MODEL  = "username-kamu/mbg-indobert-sentimen"
-HF_TOPIC_MODEL = "username-kamu/mbg-indobert-topik"
+HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen"
+HF_TOPIC_MODEL = "fandihw/mbg-indobert-topik"
 # ───────────────────────────────────────────────────────────
 
 PALETTE = {
