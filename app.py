@@ -335,7 +335,7 @@ st.markdown("""
 .metric-card .lbl { font-size: 0.82rem; color: #7f8c8d; margin-top: 2px; }
 
 .section-title {
-    font-size: 1.05rem; font-weight: 700; color: #8243f0;
+    font-size: 1.05rem; font-weight: 700; color: #43b086;
     border-bottom: 2px solid #2980b9;
     padding-bottom: 4px; margin: 1rem 0 0.7rem;
 }
