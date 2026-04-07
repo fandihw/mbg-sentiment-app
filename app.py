@@ -24,8 +24,10 @@ SENTIMENT_LABELS  = {"negatif": 0, "positif": 1}
 TOPIC_LABELS      = {"program": 0, "anggaran": 1, "gizi": 2, "distribusi": 3}
 IDX_TO_SENT       = {0: "negatif", 1: "positif"}
 IDX_TO_TOPIC      = {0: "program", 1: "anggaran", 2: "gizi", 3: "distribusi"}
-MODEL_NAME        = "indobenchmark/indobert-base-p1"
 MAX_LEN           = 128
+
+HF_SENT_MODEL  = "fandihw/mbg-indobert-sentimen"
+HF_TOPIC_MODEL = "fandihw/mbg-indobert-sentimen"
 
 PALETTE = {
     "negatif"   : "#E74C3C",
@@ -78,28 +80,28 @@ THESIS_STATS = {
     },
 }
 
-if "model_sent"  not in st.session_state: st.session_state.model_sent  = None
-if "model_top"   not in st.session_state: st.session_state.model_top   = None
-if "tok_sent"    not in st.session_state: st.session_state.tok_sent    = None
-if "tok_top"     not in st.session_state: st.session_state.tok_top     = None
-if "device"      not in st.session_state: st.session_state.device      = None
+if "model_sent"   not in st.session_state: st.session_state.model_sent   = None
+if "model_top"    not in st.session_state: st.session_state.model_top    = None
+if "tok_sent"     not in st.session_state: st.session_state.tok_sent     = None
+if "tok_top"      not in st.session_state: st.session_state.tok_top      = None
+if "device"       not in st.session_state: st.session_state.device       = None
 if "model_loaded" not in st.session_state: st.session_state.model_loaded = False
 
 
 @st.cache_resource(show_spinner=False)
-def load_models(sent_path: str, topic_path: str):
-    """Load fine-tuned IndoBERT models dari path lokal."""
+def load_models():
+    """Load fine-tuned IndoBERT models dari Hugging Face Hub."""
     import torch
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tok_sent   = AutoTokenizer.from_pretrained(sent_path)
-    model_sent = AutoModelForSequenceClassification.from_pretrained(sent_path).to(device)
+    tok_sent   = AutoTokenizer.from_pretrained(HF_SENT_MODEL)
+    model_sent = AutoModelForSequenceClassification.from_pretrained(HF_SENT_MODEL).to(device)
     model_sent.eval()
 
-    tok_top   = AutoTokenizer.from_pretrained(topic_path)
-    model_top = AutoModelForSequenceClassification.from_pretrained(topic_path).to(device)
+    tok_top   = AutoTokenizer.from_pretrained(HF_TOPIC_MODEL)
+    model_top = AutoModelForSequenceClassification.from_pretrained(HF_TOPIC_MODEL).to(device)
     model_top.eval()
 
     return tok_sent, model_sent, tok_top, model_top, device
@@ -145,10 +147,10 @@ def fig_to_img(fig):
 
 
 def plot_sentiment_dist():
-    stats   = THESIS_STATS
-    labels  = ["Negatif", "Positif"]
-    values  = [stats["total_negatif"], stats["total_positif"]]
-    colors  = [PALETTE["negatif"], PALETTE["positif"]]
+    stats  = THESIS_STATS
+    labels = ["Negatif", "Positif"]
+    values = [stats["total_negatif"], stats["total_positif"]]
+    colors = [PALETTE["negatif"], PALETTE["positif"]]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
     fig.suptitle("Distribusi Sentimen Publik terhadap Program MBG\n"
@@ -181,10 +183,10 @@ def plot_sentiment_dist():
 
 
 def plot_topic_dist():
-    td = THESIS_STATS["topic_dist"]
-    labels  = [t.capitalize() for t in td.keys()]
-    values  = list(td.values())
-    colors  = [PALETTE[t] for t in td.keys()]
+    td     = THESIS_STATS["topic_dist"]
+    labels = [t.capitalize() for t in td.keys()]
+    values = list(td.values())
+    colors = [PALETTE[t] for t in td.keys()]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
     fig.suptitle("Distribusi Topik (LDA) - Program MBG", fontsize=12, fontweight="bold")
@@ -209,8 +211,8 @@ def plot_topic_dist():
 
 
 def plot_sent_per_topic():
-    spt = THESIS_STATS["sent_per_topic"]
-    topics  = [t.capitalize() for t in spt.keys()]
+    spt      = THESIS_STATS["sent_per_topic"]
+    topics   = [t.capitalize() for t in spt.keys()]
     neg_vals = [v["negatif"] for v in spt.values()]
     pos_vals = [v["positif"] for v in spt.values()]
 
@@ -231,7 +233,8 @@ def plot_sent_per_topic():
     ax.set_xticks(x)
     ax.set_xticklabels(topics, fontsize=11)
     ax.set_ylabel("Jumlah Tweet", fontsize=10)
-    ax.set_title("Distribusi Sentimen per Topik Program MBG", fontsize=12, fontweight="bold", pad=10)
+    ax.set_title("Distribusi Sentimen per Topik Program MBG",
+                 fontsize=12, fontweight="bold", pad=10)
     ax.legend(fontsize=10)
     ax.grid(axis="y", alpha=0.3)
     for spine in ["top", "right"]:
@@ -242,8 +245,8 @@ def plot_sent_per_topic():
 
 
 def plot_metrics():
-    es = THESIS_STATS["eval_sentiment"]
-    et = THESIS_STATS["eval_topic"]
+    es      = THESIS_STATS["eval_sentiment"]
+    et      = THESIS_STATS["eval_topic"]
     metrics = list(es.keys())
     x       = np.arange(len(metrics))
     width   = 0.34
@@ -289,10 +292,8 @@ def plot_confusion_matrix(cm, labels, title):
 
 
 # CUSTOM CSS
-
 st.markdown("""
 <style>
-/* Header banner */
 .mbg-header {
     background: linear-gradient(135deg, #1a3a5c 0%, #2980b9 100%);
     padding: 1.6rem 2rem;
@@ -303,7 +304,6 @@ st.markdown("""
 .mbg-header h1 { margin: 0; font-size: 1.65rem; font-weight: 700; }
 .mbg-header p  { margin: 0.3rem 0 0; font-size: 0.9rem; opacity: 0.88; }
 
-/* Metric cards */
 .metric-card {
     background: #f8f9fa;
     border-left: 4px solid #2980b9;
@@ -314,22 +314,12 @@ st.markdown("""
 .metric-card .val { font-size: 1.8rem; font-weight: 700; color: #2c3e50; }
 .metric-card .lbl { font-size: 0.82rem; color: #7f8c8d; margin-top: 2px; }
 
-/* Prediction result badge */
-.badge-neg { background:#fdecea; color:#c0392b; border:1.5px solid #e74c3c;
-             padding:3px 12px; border-radius:20px; font-weight:600; }
-.badge-pos { background:#eafaf1; color:#1e8449; border:1.5px solid #2ecc71;
-             padding:3px 12px; border-radius:20px; font-weight:600; }
-.badge-top { background:#eaf4fb; color:#1a5276; border:1.5px solid #2980b9;
-             padding:3px 12px; border-radius:20px; font-weight:600; }
-
-/* Divider */
 .section-title {
     font-size: 1.05rem; font-weight: 700; color: #2c3e50;
     border-bottom: 2px solid #2980b9;
     padding-bottom: 4px; margin: 1rem 0 0.7rem;
 }
 
-/* Info box */
 .info-box {
     background: #eaf4fb; border-left: 4px solid #2980b9;
     padding: 0.7rem 1rem; border-radius: 6px; font-size: 0.88rem;
@@ -350,36 +340,25 @@ with st.sidebar:
     )
     st.markdown("---")
 
-    # -- Model loader --------------------------------------------------
-    st.markdown("###  Load Model")
+    st.markdown("### Load Model")
     st.markdown(
-        "<div class='info-box'>Masukkan path folder model yang sudah "
-        "di-fine-tune dari Google Drive / lokal.</div>",
+        "<div class='info-box'>Model IndoBERT akan diunduh otomatis dari "
+        "Hugging Face Hub saat pertama kali digunakan.</div>",
         unsafe_allow_html=True,
     )
 
-    sent_path  = st.text_input(" Path Model Sentimen",
-                               placeholder="/path/to/indobert_sentimen",
-                               help="Folder berisi config.json, pytorch_model.bin, tokenizer")
-    topic_path = st.text_input(" Path Model Topik",
-                               placeholder="/path/to/indobert_topik")
-
-    if st.button(" Load Model", use_container_width=True):
-        if not sent_path or not topic_path:
-            st.error("Isi kedua path model terlebih dahulu.")
-        elif not os.path.isdir(sent_path):
-            st.error(f"Path sentimen tidak ditemukan:\n{sent_path}")
-        elif not os.path.isdir(topic_path):
-            st.error(f"Path topik tidak ditemukan:\n{topic_path}")
-        else:
-            with st.spinner("Memuat model IndoBERT..."):
+    if not st.session_state.model_loaded:
+        if st.button("Load Model dari Hugging Face", use_container_width=True):
+            with st.spinner("Mengunduh dan memuat model IndoBERT... (pertama kali bisa 5-15 menit)"):
                 try:
-                    tok_sent, model_sent, tok_top, model_top, device = \
-                        load_models(sent_path, topic_path)
+                    tok_sent, model_sent, tok_top, model_top, device = load_models()
                     st.session_state.update({
-                        "tok_sent": tok_sent, "model_sent": model_sent,
-                        "tok_top" : tok_top,  "model_top" : model_top,
-                        "device"  : device,   "model_loaded": True,
+                        "tok_sent"    : tok_sent,
+                        "model_sent"  : model_sent,
+                        "tok_top"     : tok_top,
+                        "model_top"   : model_top,
+                        "device"      : device,
+                        "model_loaded": True,
                     })
                     st.success(f"Model berhasil dimuat! (device: {device})")
                 except Exception as e:
@@ -390,6 +369,9 @@ with st.sidebar:
     else:
         st.markdown("[!] Model belum dimuat - fitur prediksi nonaktif")
 
+    st.markdown("---")
+    st.caption("Tugas Akhir - Universitas Telkom - 2025")
+
 # PAGE HEADER
 st.markdown("""
 <div class="mbg-header">
@@ -398,11 +380,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# DASHBOARD 
+# DASHBOARD
 if page == " Dashboard":
-    st.markdown("###  Ringkasan Dataset & Hasil Penelitian")
+    st.markdown("### Ringkasan Dataset & Hasil Penelitian")
 
-    # KPI cards
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         st.markdown(f"""<div class="metric-card">
@@ -427,51 +408,42 @@ if page == " Dashboard":
 
     st.markdown("---")
 
-    # Distribusi sentimen & topik
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown('<div class="section-title"> Distribusi Sentimen</div>',
-                    unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Distribusi Sentimen</div>', unsafe_allow_html=True)
         fig = plot_sentiment_dist()
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
 
     with col_b:
-        st.markdown('<div class="section-title"> Distribusi Topik LDA</div>',
-                    unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Distribusi Topik LDA</div>', unsafe_allow_html=True)
         fig = plot_topic_dist()
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
 
     st.markdown("---")
 
-    # Sentimen per topik
-    st.markdown('<div class="section-title"> Distribusi Sentimen per Topik</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Distribusi Sentimen per Topik</div>', unsafe_allow_html=True)
     fig = plot_sent_per_topic()
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
-    # Tabel distribusi
-    st.markdown('<div class="section-title"> Tabel Distribusi Sentimen per Topik</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Tabel Distribusi Sentimen per Topik</div>', unsafe_allow_html=True)
     rows = []
     for topik, v in THESIS_STATS["sent_per_topic"].items():
         rows.append({
-            "Topik"     : topik.capitalize(),
-            "Total"     : v["total"],
-            "Negatif"   : v["negatif"],
-            "Positif"   : v["positif"],
-            "% Negatif" : f"{v['negatif']/v['total']*100:.1f}%",
-            "% Positif" : f"{v['positif']/v['total']*100:.1f}%",
+            "Topik"    : topik.capitalize(),
+            "Total"    : v["total"],
+            "Negatif"  : v["negatif"],
+            "Positif"  : v["positif"],
+            "% Negatif": f"{v['negatif']/v['total']*100:.1f}%",
+            "% Positif": f"{v['positif']/v['total']*100:.1f}%",
         })
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
     st.markdown("---")
 
-    # LDA keywords
-    st.markdown('<div class="section-title"> Kata Kunci LDA per Topik</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Kata Kunci LDA per Topik</div>', unsafe_allow_html=True)
     col_lda = st.columns(2)
     for idx, (label, keywords) in enumerate(THESIS_STATS["lda_keywords"].items()):
         with col_lda[idx % 2]:
@@ -483,17 +455,16 @@ if page == " Dashboard":
                 <span style='font-size:0.87rem;color:#555'>{keywords}</span>
             </div>""", unsafe_allow_html=True)
 
-# PAGE: PREDIKSI 
+# PREDIKSI
 elif page == " Prediksi Tweet":
-    st.markdown("###  Prediksi Sentimen & Topik")
+    st.markdown("### Prediksi Sentimen & Topik")
 
     if not st.session_state.model_loaded:
-        st.warning("[!] Model belum dimuat. Silakan isi path model di sidebar dan klik **Load Model**.")
+        st.warning("[!] Model belum dimuat. Klik **Load Model dari Hugging Face** di sidebar.")
         st.stop()
 
     mode = st.tabs(["Mode 1 . Satu Tweet", "Mode 2 . Daftar Tweet", "Mode 3 . Upload CSV"])
 
-    #  Mode 1 
     with mode[0]:
         st.markdown("#### Mode 1 - Prediksi Satu Tweet")
         tweet_input = st.text_area(
@@ -501,7 +472,7 @@ elif page == " Prediksi Tweet":
             placeholder='Contoh: "Terlalu banyak anggaran yang digunakan untuk MBG yang tidak berguna ini"',
             height=110,
         )
-        if st.button(" Prediksi", key="btn_mode1", use_container_width=False):
+        if st.button("Prediksi", key="btn_mode1"):
             if not tweet_input.strip():
                 st.error("Tweet tidak boleh kosong.")
             else:
@@ -517,7 +488,7 @@ elif page == " Prediksi Tweet":
                 top_color  = PALETTE[hasil["topik"]]
 
                 st.markdown("---")
-                st.markdown("#####  Hasil Prediksi")
+                st.markdown("##### Hasil Prediksi")
                 col_r1, col_r2 = st.columns(2)
 
                 with col_r1:
@@ -579,7 +550,6 @@ elif page == " Prediksi Tweet":
                             <span style='width:55px;font-size:0.85rem;font-weight:600'>{prob}</span>
                         </div>""", unsafe_allow_html=True)
 
-    # Mode 2 
     with mode[1]:
         st.markdown("#### Mode 2 - Prediksi Daftar Tweet (satu tweet per baris)")
         tweets_raw = st.text_area(
@@ -593,12 +563,12 @@ elif page == " Prediksi Tweet":
             ),
         )
 
-        if st.button(" Prediksi Semua", key="btn_mode2"):
+        if st.button("Prediksi Semua", key="btn_mode2"):
             lines = [l.strip() for l in tweets_raw.splitlines() if l.strip()]
             if not lines:
                 st.error("Masukkan minimal satu tweet.")
             else:
-                results = []
+                results  = []
                 progress = st.progress(0, text="Memprediksi tweet...")
                 for i, tweet in enumerate(lines):
                     h = predict_single(
@@ -621,7 +591,6 @@ elif page == " Prediksi Tweet":
                 df_res = pd.DataFrame(results)
                 st.dataframe(df_res, use_container_width=True, hide_index=True)
 
-                # Mini ringkasan
                 sent_counts = df_res["Sentimen"].value_counts()
                 top_counts  = df_res["Topik"].value_counts()
                 st.markdown("---")
@@ -639,17 +608,15 @@ elif page == " Prediksi Tweet":
                         st.markdown(f"<span style='color:{c};font-weight:600'>- {lbl}</span>: {cnt} tweet",
                                     unsafe_allow_html=True)
 
-                # Download
                 csv_bytes = df_res.to_csv(index=False).encode("utf-8")
-                st.download_button(" Download Hasil (.csv)", csv_bytes,
+                st.download_button("Download Hasil (.csv)", csv_bytes,
                                    "hasil_prediksi_mode2.csv", "text/csv")
 
-    # Mode 3 
     with mode[2]:
         st.markdown("#### Mode 3 - Prediksi dari File CSV")
         st.markdown("""
         <div class="info-box">
-         File CSV harus memiliki kolom bernama <b><code>tweet</code></b>
+        File CSV harus memiliki kolom bernama <b><code>tweet</code></b>
         yang berisi teks tweet yang ingin diprediksi.
         </div>""", unsafe_allow_html=True)
 
@@ -662,12 +629,11 @@ elif page == " Prediksi Tweet":
                 if "tweet" not in df_input.columns:
                     st.error(f"Kolom 'tweet' tidak ditemukan. Kolom yang tersedia: {list(df_input.columns)}")
                 else:
-                    n_preview = min(3, len(df_input))
-                    st.dataframe(df_input.head(n_preview), use_container_width=True, hide_index=True)
+                    st.dataframe(df_input.head(3), use_container_width=True, hide_index=True)
 
-                    if st.button(" Jalankan Prediksi CSV", key="btn_mode3"):
-                        results = []
-                        progress = st.progress(0, text="Memproses tweet...")
+                    if st.button("Jalankan Prediksi CSV", key="btn_mode3"):
+                        results    = []
+                        progress   = st.progress(0, text="Memproses tweet...")
                         total_rows = len(df_input)
 
                         for i, row in df_input.iterrows():
@@ -678,11 +644,11 @@ elif page == " Prediksi Tweet":
                                 st.session_state.device,
                             )
                             results.append({
-                                "tweet"         : row["tweet"],
-                                "sentimen"      : h["sentimen"],
-                                "sentimen_conf" : h["sentimen_conf"],
-                                "topik"         : h["topik"],
-                                "topik_conf"    : h["topik_conf"],
+                                "tweet"        : row["tweet"],
+                                "sentimen"     : h["sentimen"],
+                                "sentimen_conf": h["sentimen_conf"],
+                                "topik"        : h["topik"],
+                                "topik_conf"   : h["topik_conf"],
                             })
                             progress.progress((i + 1) / total_rows,
                                               text=f"Tweet {i+1}/{total_rows}...")
@@ -692,7 +658,6 @@ elif page == " Prediksi Tweet":
                         st.success(f"[v] Prediksi selesai untuk {len(df_out):,} tweet!")
                         st.dataframe(df_out, use_container_width=True, hide_index=True)
 
-                        # Ringkasan
                         st.markdown("---")
                         st.markdown("##### Ringkasan Distribusi Hasil Prediksi")
                         col_rs, col_rt = st.columns(2)
@@ -728,18 +693,16 @@ elif page == " Prediksi Tweet":
                             plt.close(fig_t)
 
                         csv_bytes = df_out.to_csv(index=False).encode("utf-8")
-                        st.download_button(" Download Hasil (.csv)", csv_bytes,
+                        st.download_button("Download Hasil (.csv)", csv_bytes,
                                            "hasil_prediksi_csv.csv", "text/csv")
             except Exception as e:
                 st.error(f"Gagal membaca file: {e}")
 
-# PAGE: EVALUASI 
+# EVALUASI
 elif page == " Evaluasi Model":
-    st.markdown("###  Hasil Evaluasi Model IndoBERT")
+    st.markdown("### Hasil Evaluasi Model IndoBERT")
 
-    # Ringkasan metrik
-    st.markdown('<div class="section-title">Ringkasan Metrik Evaluasi</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Ringkasan Metrik Evaluasi</div>', unsafe_allow_html=True)
     col_m1, col_m2 = st.columns(2)
 
     with col_m1:
@@ -754,9 +717,7 @@ elif page == " Evaluasi Model":
         df_mt.index = ["IndoBERT Topik"]
         st.dataframe(df_mt.style.format("{:.4f}"), use_container_width=True)
 
-    # Per-class topik
-    st.markdown('<div class="section-title">Metrik per Kelas - Model Topik</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Metrik per Kelas - Model Topik</div>', unsafe_allow_html=True)
     df_cls = pd.DataFrame(THESIS_STATS["eval_topic_class"]).T
     st.dataframe(df_cls.style.format({"Precision": "{:.4f}", "Recall": "{:.4f}",
                                       "F1-Score": "{:.4f}", "Support": "{:.0f}"}),
@@ -764,18 +725,14 @@ elif page == " Evaluasi Model":
 
     st.markdown("---")
 
-    # Bar chart metrik
-    st.markdown('<div class="section-title">Visualisasi Metrik Evaluasi</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Visualisasi Metrik Evaluasi</div>', unsafe_allow_html=True)
     fig = plot_metrics()
     st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
     st.markdown("---")
 
-    # Confusion matrices
-    st.markdown('<div class="section-title">Confusion Matrix</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Confusion Matrix</div>', unsafe_allow_html=True)
     col_cm1, col_cm2 = st.columns([1, 1.5])
 
     with col_cm1:
@@ -808,6 +765,7 @@ elif page == " Evaluasi Model":
     - Class weighting diterapkan untuk mengatasi imbalance negatif:positif = 5.8:1.
     </div>""", unsafe_allow_html=True)
 
+# TENTANG
 elif page == "Info Tentang":
     st.markdown("### Info Tentang Aplikasi")
     st.markdown("""
@@ -845,22 +803,9 @@ elif page == "Info Tentang":
 
     | Topik | Kata Kunci Representatif |
     |-------|--------------------------|
-    | [Biru] Program | pendidikan, kualitas, guru, negara, keracunan, kebijakan, dana |
-    | [Oranye] Anggaran | rakyat, anggaran, korupsi, negara, efisiensi, APBN, pejabat, pajak |
-    | [Ungu] Gizi | anak, gizi, keracunan, kualitas, pelaksanaan, siswa, sekolah, sehat |
-    | [Hijau] Distribusi | catering, sekolah, dapur, kualitas, korupsi, keracunan, porsi, vendor |
-
-    ---
-
-    **Cara Menggunakan Prediksi:**
-    1. Simpan model fine-tuned dari Google Colab ke lokal (folder `indobert_sentimen` & `indobert_topik`)
-    2. Isi path di sidebar -> klik **Load Model**
-    3. Gunakan salah satu mode prediksi (Mode 1, 2, atau 3)
-
-    **Download model dari Google Drive:**
-    ```
-    # Di terminal:
-    pip install gdown
-    gdown --folder https://drive.google.com/drive/folders/YOUR_FOLDER_ID
-    ```
+    | Program | pendidikan, kualitas, guru, negara, keracunan, kebijakan, dana |
+    | Anggaran | rakyat, anggaran, korupsi, negara, efisiensi, APBN, pejabat, pajak |
+    | Gizi | anak, gizi, keracunan, kualitas, pelaksanaan, siswa, sekolah, sehat |
+    | Distribusi | catering, sekolah, dapur, kualitas, korupsi, keracunan, porsi, vendor |
     """)
+    st.caption("Universitas Telkom - Tugas Akhir 2025")
