@@ -96,11 +96,11 @@ def load_models():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tok_sent   = AutoTokenizer.from_pretrained(HF_SENT_MODEL)
+    tok_sent   = AutoTokenizer.from_pretrained(HF_SENT_MODEL, use_fast=False)
     model_sent = AutoModelForSequenceClassification.from_pretrained(HF_SENT_MODEL).to(device)
     model_sent.eval()
 
-    tok_top   = AutoTokenizer.from_pretrained(HF_TOPIC_MODEL)
+    tok_top   = AutoTokenizer.from_pretrained(HF_TOPIC_MODEL, use_fast=False)
     model_top = AutoModelForSequenceClassification.from_pretrained(HF_TOPIC_MODEL).to(device)
     model_top.eval()
 
